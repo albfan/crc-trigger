@@ -36,6 +36,7 @@ rhelParameter="- name: rhel-version\n    value:"
 if [ -d "test" ];then
  rm -r test
 fi
+
 mkdir test
 for i in ${virtual[@]}; do
     echo "creating yaml file for $i"
