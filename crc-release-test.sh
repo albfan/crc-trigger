@@ -22,7 +22,10 @@ virtual=(fedora-42 fedora-43 rhel-10.0 windows-10)
 crc_version=$1
 crc_v2=${crc_version:0:4}
 crc_v1=${crc_version:0:1}
-crcPath="http://download.eng.pek2.redhat.com/etera/crc/${crc_v1}/${crc_v2}/${crc_version}/staging"
+crcPrefix=
+#crcPrefix="http://download.eng.pek2.redhat.com/etera/crc"
+crcPrefix="https://download.eng.brq.redhat.com/etera/crc"
+crcPath="${crcPrefix}/${crc_v1}/${crc_v2}/${crc_version}/staging"
 shafile="sha256sum.txt"
 verify_file_exist $crcPath $shafile
 
