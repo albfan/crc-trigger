@@ -1,5 +1,7 @@
 #!/bin/bash
+
 #set -x
+
 function verify_bundle_exist() {
     check_address=$1/$2
     echo "verify existing of $check_address"
@@ -83,6 +85,29 @@ function create_yaml_file(){
     fi
 }
 
+function help() {
+  cat << EOF
+Usage: $0"
+	-p,--purpose
+		bundle-test
+		interop-test
+		nightly-run
+		crc-pr-test
+		snc-pr-test
+		other			Type of test, default nightly-run"
+	--platform			Which OS to run default: windows,mac-amd,mac-arm,linux-amd,linux-arm"
+	-b,--bundle <bundle>		Change bundle to run with, default: set by current crc version"
+	--preset openshift/microshift	Container type, default openshift"
+	--e2e				Whether run e2e test, default true"
+	--e2etag			Tags for e2e test, default ~@minimal && ~@story_microshift && ~@release"
+	--integration			Whether run integration test, default true"
+	--integrationtag		Tags for integration test, default ! microshift-preset"
+	-r,--pr <pr>			Run against PR instead of tip"
+	--trigger true|false 		Create pipeline run with yaml files, default false"
+	-d true|false			Enable debug
+EOF
+}
+
 
 if [[ "$#" -eq 0 ]]; then
   echo "using -h/--help to check parameters"
@@ -101,18 +126,8 @@ pendingStatus="PipelineRunPending"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
-        echo "Usage: $0"
-        echo "	-p,--purpose <purpose>		['bundle-test','interop-test','nightly-run','crc-pr-test','snc-pr-test','other']"
-        echo "	--platform			Which OS to run default: windows,mac-amd,mac-arm,linux-amd,linux-arm"
-        echo "	-b,--bundle <bundle>		Change bundle to run with, default: set by current crc version"
-        echo "	--preset openshift/microshift	Container type, default openshift"
-        echo "	--e2e				Whether run e2e test, default true"
-        echo "	--e2etag			Tags for e2e test, default ~@minimal && ~@story_microshift && ~@release"
-        echo "	--integration			Whether run integration test, default true"
-        echo "	--integrationtag		Tags for integration test, default ! microshift-preset"
-        echo "	-r,--pr <pr>			Run against PR instead of tip"
-        echo "	--trigger			Create pipeline run with yaml files"
-        exit 1 ;;
+        help
+        exit ;;
     -p|--purpose)
         purpose=$2;
         shift 2 ;;
@@ -146,15 +161,23 @@ while [[ $# -gt 0 ]]; do
     --trigger)
         trigger=$2;
         shift 2 ;;
+    *)
+        cat <&2 <<EOF
+
+Error, unknown arguments $@
+EOF
+         help
+         exit 1 ;;
   esac
 done
 
 echo "Purpose: $purpose"
-echo "Bundle: $bundle"
+echo "Preset: $preset"
 if [[ $bundle == '' ]]; then
   echo "please input the bundle version"
   exit 1
 fi
+echo "Bundle: $bundle"
 
 
 today=`date +"%Y%m%d"`
@@ -241,8 +264,6 @@ IFS=',' read -ra allplatform <<< "$platforms"
 for p in "${allplatform[@]}"; do
   create_yaml_file $p $preset
 done
-
-rm test/*.yaml-e
 
 if [[ $trigger == 'true' ]]; then
   oc project | grep "devtoolsqe--pipeline"
