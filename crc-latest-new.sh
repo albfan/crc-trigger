@@ -266,7 +266,7 @@ for p in "${allplatform[@]}"; do
 done
 
 if [[ $trigger == 'true' ]]; then
-  oc project | grep "devtoolsqe--pipeline"
+  oc project | grep "devtoolsqe--pipeline" || (echo set project to devtoolsqe-pipeline && exit 1)
   oc create -f test
 else
   echo "pipeline run yaml files created in folder test"
