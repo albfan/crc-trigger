@@ -54,8 +54,8 @@ function create_yaml_file(){
 
         bundleName=crc${B_preset}_${vm}_${bundle}_${arch}.crcbundle
 
-        sed -i'' -e "s#<tester>#$tester#g"  $file   
-        sed -i'' -e "s#<builder>#$builder#g"  $file    
+        sed -i'' -e "s#<tester>#$tester#g"  $file
+        sed -i'' -e "s#<builder>#$builder#g"  $file
         sed -i'' -e "s#<status>#$status#g"  $file
         sed -i'' -e "s#<Bundle-name>#${bundleName}#g"  $file
     fi
@@ -72,7 +72,7 @@ function create_yaml_file(){
     sed -i'' -e "s#<PURPOSE>#$purpose1#g"  $file
     sed -i'' -e "s#<preset>#$preset#g"  $file
 
-    if [[ $purpose == 'snc-pr-test' ]] || [[ $purpose == 'interop-test' ]] && [[ $1 == *-arm ]]; then       
+    if [[ $purpose == 'snc-pr-test' ]] || [[ $purpose == 'interop-test' ]] && [[ $1 == *-arm ]]; then
         sed -i'' -e "s#<SHA-FILE>#${bundleShaArm}#g"  $file
     else
         sed -i'' -e "s#<SHA-FILE>#${bundleSha}#g"  $file
@@ -80,7 +80,7 @@ function create_yaml_file(){
 
     if [[ $1 == linux-amd ]]; then
         sed -i'' -e '7d' $file
-    fi 
+    fi
 }
 
 
@@ -102,25 +102,25 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
         echo "Usage: $0"
-        echo "-p|--purpose <purpose>: ['bundle-test','interop-test','nightly-run','crc-pr-test','snc-pr-test','other']" 
-        echo "--platform , default: windows,mac-amd,mac-arm,linux-amd,linux-arm"
-        echo "-b|--bundle <bundle>"
-        echo "--preset openshift/microshift; default openshift"
-        echo "--e2e whether run e2e test; default true"
-        echo "--e2etag, tags for e2e test, default ~@minimal && ~@story_microshift && ~@release"
-        echo "--integration, whether run integration test, default true"
-        echo "--integrationtag, tags for integration test, default ! microshift-preset"
-        echo "-r|--pr <pr>"
-        echo "--trigger create pipeline run with yaml files"
+        echo "	-p,--purpose <purpose>		['bundle-test','interop-test','nightly-run','crc-pr-test','snc-pr-test','other']"
+        echo "	--platform			Which OS to run default: windows,mac-amd,mac-arm,linux-amd,linux-arm"
+        echo "	-b,--bundle <bundle>		Change bundle to run with, default: set by current crc version"
+        echo "	--preset openshift/microshift	Container type, default openshift"
+        echo "	--e2e				Whether run e2e test, default true"
+        echo "	--e2etag			Tags for e2e test, default ~@minimal && ~@story_microshift && ~@release"
+        echo "	--integration			Whether run integration test, default true"
+        echo "	--integrationtag		Tags for integration test, default ! microshift-preset"
+        echo "	-r,--pr <pr>			Run against PR instead of tip"
+        echo "	--trigger			Create pipeline run with yaml files"
         exit 1 ;;
-    -p|--purpose) 
-        purpose=$2; 
+    -p|--purpose)
+        purpose=$2;
         shift 2 ;;
-    -r|--pr) 
-        pr=$2; 
+    -r|--pr)
+        pr=$2;
         shift 2 ;;
-    -b|--bundle) 
-        bundle=$2; 
+    -b|--bundle)
+        bundle=$2;
         shift 2 ;;
     --preset)
         preset=$2;
@@ -152,15 +152,15 @@ done
 echo "Purpose: $purpose"
 echo "Bundle: $bundle"
 if [[ $bundle == '' ]]; then
-    echo "please input the bundle version"
-    exit 1
+  echo "please input the bundle version"
+  exit 1
 fi
 
 
 today=`date +"%Y%m%d"`
 
 # deal with bundle path and s3 path
-bundleSha="sha256sum.txt" 
+bundleSha="sha256sum.txt"
 crcPR=''
 s3path="nightly/crc/$today"
 bundlePath="https://cdk-builds.usersys.redhat.com/builds/crc/bundles/$preset"
@@ -169,31 +169,31 @@ bundleShaArm=""
 purpose1=$purpose
 
 if [[ $purpose == 'snc-pr-test' ]]; then
-    bundlePath="https://crc-bundle.s3.us-east-1.amazonaws.com/snc-pr/${pr}"
-    bundlePathArm=$bundlePath
-    bundleSha="bundles.x86_64.sha256"
-    bundleShaArm="bundles.arm64.sha256"
-    verify_bundle_exist $bundlePath/$bundle $bundleSha
-    verify_bundle_exist $bundlePath/$bundle $bundleShaArm
-    s3path="nightly/crc/snc-pr/${pr}"
-    purpose1=${purpose}-${pr}
+  bundlePath="https://crc-bundle.s3.us-east-1.amazonaws.com/snc-pr/${pr}"
+  bundlePathArm=$bundlePath
+  bundleSha="bundles.x86_64.sha256"
+  bundleShaArm="bundles.arm64.sha256"
+  verify_bundle_exist $bundlePath/$bundle $bundleSha
+  verify_bundle_exist $bundlePath/$bundle $bundleShaArm
+  s3path="nightly/crc/snc-pr/${pr}"
+  purpose1=${purpose}-${pr}
 elif [[ $purpose == 'interop-test' ]]; then
-    bundlePath="https://crc-bundle.s3.us-east-1.amazonaws.com"
-    bundlePathArm=$bundlePath
-    bundleSha="bundles.x86_64.sha256"
-    bundleShaArm="bundles.arm64.sha256"
-    verify_bundle_exist $bundlePath/$bundle $bundleSha
-    verify_bundle_exist $bundlePath/$bundle $bundleShaArm
-    s3path="nightly/ocp"
+  bundlePath="https://crc-bundle.s3.us-east-1.amazonaws.com"
+  bundlePathArm=$bundlePath
+  bundleSha="bundles.x86_64.sha256"
+  bundleShaArm="bundles.arm64.sha256"
+  verify_bundle_exist $bundlePath/$bundle $bundleSha
+  verify_bundle_exist $bundlePath/$bundle $bundleShaArm
+  s3path="nightly/ocp"
 else
-    verify_bundle_exist $bundlePath/$bundle $bundleSha
-    verify_bundle_exist $bundlePathArm/$bundle $bundleSha
+  verify_bundle_exist $bundlePath/$bundle $bundleSha
+  verify_bundle_exist $bundlePathArm/$bundle $bundleSha
 
-    if [[ $purpose == 'crc-pr-test' ]]; then 
-        crcPR=$pr
-        s3path="nightly/crc/crc-pr/${pr}"
-        purpose1=${purpose}-${pr}
-    fi
+  if [[ $purpose == 'crc-pr-test' ]]; then
+    crcPR=$pr
+    s3path="nightly/crc/crc-pr/${pr}"
+    purpose1=${purpose}-${pr}
+  fi
 fi
 
 
@@ -203,24 +203,24 @@ integrationTagOcp="! microshift-preset"
 e2eTagMicroshift="@story_microshift"
 integrationTagMicroshift="microshift-preset"
 if [[ $preset == "microshift" ]]; then
-    if [[ $e2eTag == ''  ]]; then
-        e2eTag=$e2eTagMicroshift
-    fi
-    if [[ $integrationTag == '' ]]; then
-        integrationTag=$integrationTagMicroshift
-    fi
+  if [[ $e2eTag == ''  ]]; then
+    e2eTag=$e2eTagMicroshift
+  fi
+  if [[ $integrationTag == '' ]]; then
+    integrationTag=$integrationTagMicroshift
+  fi
 else
-    if [[ $e2eTag == ''  ]]; then
-        e2eTag=$e2eTagOcp
-    fi
-    if [[ $integrationTag == '' ]]; then
-        integrationTag=$integrationTagOcp
-    fi
+  if [[ $e2eTag == ''  ]]; then
+    e2eTag=$e2eTagOcp
+  fi
+  if [[ $integrationTag == '' ]]; then
+    integrationTag=$integrationTagOcp
+  fi
 fi
 
 
 
-# ENV: 
+# ENV:
 # 1. test purpose
 # 2. bundle version
 # 3. crc-pr
@@ -230,7 +230,7 @@ fi
 # 7. e2e-tag
 # 8. run-integration
 # 9. integration-tag
-# 10. debug 
+# 10. debug
 
 if [ -d "test" ];then
  rm -r test
@@ -244,10 +244,10 @@ done
 
 rm test/*.yaml-e
 
-if [[ $trigger == 'true' ]]; then 
-    oc project | grep "devtoolsqe--pipeline"
-    oc create -f test
-else    
-    echo "pipeline run yaml files created in folder test"
+if [[ $trigger == 'true' ]]; then
+  oc project | grep "devtoolsqe--pipeline"
+  oc create -f test
+else
+  echo "pipeline run yaml files created in folder test"
 fi
 
