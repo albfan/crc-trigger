@@ -32,7 +32,7 @@ spec:
     - name: crc-version
       value: next
   workspaces:
-    - name: storage 
+    - name: storage
       persistentVolumeClaim:
         claimName: pipelines-data
     - name: aws-credentials

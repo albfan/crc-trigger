@@ -20,7 +20,7 @@ spec:
   params:
   - name: secret-tester
     value: <tester>
-  - name: secret-builder 
+  - name: secret-builder
     value: <builder>
   - name: bundle-name
     value: <Bundle-name>
@@ -47,11 +47,11 @@ spec:
   - name: crc-version
     value: next
   workspaces:
-    - name: storage 
+    - name: storage
       persistentVolumeClaim:
         claimName: pipelines-data
     - name: ocp-pullsecret
       secret:
         secretName: crc-crc-qe
-    
+
   timeout: "5h"
