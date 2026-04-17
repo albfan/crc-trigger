@@ -32,6 +32,56 @@ spec:
         script: |
           #!/bin/sh
 
+          function download() {
+            echo downloading $1
+            wget --no-check-certificate -r --no-parent -nd -R 'index.html*' $1 -P downloads 2>&1 | stdbuf -i0 -o0 -e0 awk '
+              /%/ {
+                p = $7; sub(/%/, "", p);
+                if (p % 10 == 0 && p != last) {
+                  print p "% completed";
+                  last = p;
+                }
+              }'
+          }
+
+          function upload_aws() {
+            echo uploading to aws $1
+            aws s3 cp --recursive downloads/ $1 2>&1 | stdbuf -i0 -o0 -e0 awk -v RS='\r' '
+            /Completed/ {
+              match($0, /\(([0-9.]+)%\)/, pc)
+              if (pc[1] == "") {
+                  split($2, current, " ");
+                  split($3, total, "/");
+                  val_cur = current[1];
+                  val_unit = total[1]
+                  val_tot = total[2];
+                  tot_unit = $4
+
+                  cur_div = 1
+                  if (val_unit ~ /Bytes/) { cur_div *= 1024 * 1024 * 1024 }
+                  if (val_unit ~ /KiB/) { cur_div *= 1024 * 1024 }
+                  if (val_unit ~ /MiB/) { cur_div *= 1024 }
+                  if (val_unit ~ /GiB/) { cur_div *= 1 }
+                  val_cur /= cur_div
+
+                  tot_div = 1
+                  if (tot_unit ~ /Bytes/) { tot_div *= 1024 * 1024 * 1024 }
+                  if (tot_unit ~ /KiB/) { tot_div *= 1024 * 1024 }
+                  if (tot_unit ~ /MiB/) { tot_div *= 1024 }
+                  if (tot_unit ~ /GiB/) { tot_div *= 1 }
+                  tot_cur /= tot_div
+                  if (val_tot > 0)
+                      pct = int((val_cur / val_tot) * 100)
+              } else {
+                  pct = int(pc[1])
+              }
+              if (pct - last > 10) {
+                print pct "% completed"
+                last = pct
+              }
+            }'
+          }
+
           AWS_PATH=/home/1001/.aws
           mkdir $AWS_PATH
           cat <<EOF > $AWS_PATH/config
@@ -45,7 +95,7 @@ spec:
           EOF
           mkdir downloads
           bundle=$(params.source-url)/$(params.bundle-name)
-          wget --no-check-certificate -r --no-parent -nd -R 'index.html*' $bundle -P downloads
+          download $bundle
           checkfile=$(params.source-url)/sha256sum.txt
-          wget --no-check-certificate -r --no-parent -nd -R 'index.html*' $checkfile -P downloads
-          aws s3 cp --recursive downloads/ s3://$(params.s3-bucket)/$(params.s3-path)
+          download $checkfile
+          upload_aws s3://$(params.s3-bucket)/$(params.s3-path)
