@@ -73,6 +73,7 @@ function create_yaml_file(){
     sed -i'' -e "s#<platform>#$1#g"  $file
     sed -i'' -e "s#<PURPOSE>#$purpose1#g"  $file
     sed -i'' -e "s#<preset>#$preset#g"  $file
+    sed -i'' -e "s#<crc-version>#$crc_version#g"  $file
 
     if [[ $purpose == 'snc-pr-test' ]] || [[ $purpose == 'interop-test' ]] && [[ $1 == *-arm ]]; then
         sed -i'' -e "s#<SHA-FILE>#${bundleShaArm}#g"  $file
@@ -105,6 +106,7 @@ Usage: $0"
 	-r,--pr <pr>			Run against PR instead of tip
 	--trigger true|false 		Create pipeline run with yaml files, default false
 	-d true|false			Enable debug
+	--crc-version			Crc version, default next
 EOF
 }
 
@@ -122,6 +124,7 @@ purpose="nightly-run"
 debug='false'
 trigger='false'
 pendingStatus="PipelineRunPending"
+crc_version="next"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -160,6 +163,9 @@ while [[ $# -gt 0 ]]; do
         shift 2 ;;
     --trigger)
         trigger=$2;
+        shift 2 ;;
+    --crc-version)
+        crc_version=$2;
         shift 2 ;;
     *)
         cat <&2 <<EOF
