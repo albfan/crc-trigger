@@ -7,7 +7,7 @@ spec:
   workspaces:
     - name: aws-config
       secret:
-        secretName: credentials-aws-crcqe-bot
+        secretName: aws-crcqe-bot
   params:
     - name: source-url
       value: <Bundle_url>
@@ -18,7 +18,6 @@ spec:
   taskSpec:
     workspaces:
       - name: aws-config
-        mountPath: /home/1001/.aws
     params:
       - name: source-url
       - name: bundle-name
@@ -32,6 +31,18 @@ spec:
         workingDir: /home/1001
         script: |
           #!/bin/sh
+
+          AWS_PATH=/home/1001/.aws
+          mkdir $AWS_PATH
+          cat <<EOF > $AWS_PATH/config
+          [default]
+            region = us-east-1
+          EOF
+          cat <<EOF > $AWS_PATH/credentials
+          [default]
+            aws_access_key_id = $(cat $(workspaces.aws-config.path)/access-key)
+            aws_secret_access_key = $(cat $(workspaces.aws-config.path)/secret-key)
+          EOF
           mkdir downloads
           bundle=$(params.source-url)/$(params.bundle-name)
           wget --no-check-certificate -r --no-parent -nd -R 'index.html*' $bundle -P downloads
