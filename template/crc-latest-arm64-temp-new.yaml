@@ -39,7 +39,7 @@ spec:
     - name: crc-version
       value: "<crc-version>"
   workspaces:
-    - name: storage 
+    - name: storage
       persistentVolumeClaim:
         claimName: pipelines-data
     - name: ocp-pullsecret
