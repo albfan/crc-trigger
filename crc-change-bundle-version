@@ -1,0 +1,52 @@
+#!/bin/bash
+
+SCRIPTNAME=$(basename "$0")
+
+if [ $# -ne 2 ]
+then
+  cat << EOF
+
+Error: two arguments are expected
+Usage: $SCRIPTNAME <bundle-type> <bundle-version>
+Example: $SCRIPTNAME openshift 4.21.10
+EOF
+  exit 1
+fi
+
+BUNDLE_OPT=$1
+
+BUNDLE_TYPE=""
+if [ $BUNDLE_OPT == "openshift" ]
+then
+  BUNDLE_TYPE="ocp-version"
+elif [ $BUNDLE_OPT == "microshift" ]
+then
+  BUNDLE_TYPE="microshift-version"
+fi
+
+if [ "$BUNDLE_TYPE" == "" ]
+then
+  cat << EOF
+
+Bundle type $BUNDLE_OPT unknown. Valid options are openshift/microshift
+EOF
+  exit 1
+fi
+
+BUNDLE_VERSION=$2
+
+if [[ ! $BUNDLE_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+then
+    cat << EOF
+
+Error: bundle-version is expected to use format X.Y.Z (ie. 4.21.10)
+EOF
+    exit 1
+fi
+
+echo -\> patching bundle $BUNDLE_OPT with new version $BUNDLE_VERSION
+oc patch configmap config-crc-release -p "{\"data\":{\"${BUNDLE_TYPE}\":\"${BUNDLE_VERSION}\"}}"
+
+echo -\> result:
+oc get cm config-crc-release -o yaml | oc neat
+
