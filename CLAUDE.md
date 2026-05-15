@@ -74,3 +74,4 @@ See `README.md` for full examples. Key patterns:
 |-------|---------|
 | `change-bundle-version` | Update openshift/microshift bundle version in `config-crc-release` ConfigMap for nightly runs |
 | `report-portal-summary` | Summarize CRC test results from Report Portal (nightly, interop, PR tests, etc.) with flaky test classification |
+| `manage-errata` | Check and ACK errata advisories on errata.devel.redhat.com after nightly results pass (QE → REL_PREP) |
