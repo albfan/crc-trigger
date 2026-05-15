@@ -67,3 +67,10 @@ See `README.md` for full examples. Key patterns:
 - No package manager or build system -- pure bash scripts
 - Bash completion available in `etc/crc-latest-new.completion`
 - `awk_function` is a shared AWK helper for parsing download/upload progress output
+
+## Claude Code Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `change-bundle-version` | Update openshift/microshift bundle version in `config-crc-release` ConfigMap for nightly runs |
+| `report-portal-summary` | Summarize CRC test results from Report Portal (nightly, interop, PR tests, etc.) with flaky test classification |
