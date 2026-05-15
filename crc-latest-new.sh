@@ -8,7 +8,7 @@ function verify_bundle_exist() {
     valid_code=$(curl -s -fI -o /dev/null -w "%{http_code}" $check_address)
     echo $valid_code
     if [ $valid_code != 200 ]; then
-        echo "The url of $check_address not accessible, please check again"
+        echo "The url of $check_address not accessible"
         exit 1
     fi
 }
@@ -97,7 +97,7 @@ Usage: $0"
 		snc-pr-test
 		other			Type of test, default nightly-run
 	--platform			Which OS to run default: windows,mac-amd,mac-arm,linux-amd,linux-arm
-	-b,--bundle <bundle>		Change bundle to run with, default: set by current crc version
+	-b,--bundle <bundle>		Change bundle to run with, Required
 	--preset openshift/microshift	Container type, default openshift
 	--e2e				Whether run e2e test, default true
 	--e2etag			Tags for e2e test, default ~@minimal && ~@story_microshift && ~@release
